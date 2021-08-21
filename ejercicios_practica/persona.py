@@ -20,7 +20,23 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy import func
 
+import matplotlib
+matplotlib.use('Agg')   # For multi thread, non-interactive backend (avoid run in main loop)
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
+import matplotlib.image as mpimg
+
+import base64
+import io
+
+
+from collections import OrderedDict
+
 from flask_sqlalchemy import SQLAlchemy
+
+from flask import Response
+
 db = SQLAlchemy()
 
 class Persona(db.Model):
@@ -71,3 +87,43 @@ def report(limit=0, offset=0):
         json_result_list.append(json_result)
 
     return json_result_list
+
+def nationality_review():
+    
+    query = db.session.query(Persona)
+    
+    fig = Figure(figsize=(15,7))
+    fig.tight_layout()
+    
+    ax = fig.add_subplot(1,2,1)
+    ax2 = fig.add_subplot(1,2,2)
+   
+
+    lista_nacionalidadesx = [x.nationality for x in query]
+    lista_ids = [x.id for x in query]
+    lista_edades = [x.age for x in query]
+    lista_nacionalidades = list(OrderedDict.fromkeys(lista_nacionalidadesx))
+    lenlist = int(len(lista_ids)+1)
+    
+    numlist = []
+    for x in lista_nacionalidades:
+        numlist.append(lista_nacionalidadesx.count(x))
+
+    ax.set_title("Nacionalidades",fontsize=20)
+    ax.pie(numlist,labels = lista_nacionalidades,autopct='%1.1f%%',shadow=True)
+    ax.axis('equal')
+
+
+    ax2.scatter(lista_ids, lista_edades, c='darkred')
+    ax2.legend()
+    ax2.grid()
+    ax2.set_xlabel('Ids')
+    ax2.set_ylabel('Edad')
+
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+        
+    return Response(output.getvalue(), mimetype='image/png')
+    
+
+    

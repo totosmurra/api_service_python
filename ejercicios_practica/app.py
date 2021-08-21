@@ -104,6 +104,15 @@ def personas():
         limit = 0
         offset = 0
 
+        limit_string = str(request.args.get('limit'))
+        offset_string = str(request.args.get('offset'))
+
+        if (limit_string is not None) and (limit_string.isdigit()):
+            limit = int(limit_string)
+
+        if (offset_string is not None) and (offset_string.isdigit()):
+            offset = int(offset_string)
+
         result = persona.report(limit=limit, offset=offset)
         return jsonify(result)
     except:
@@ -114,6 +123,7 @@ def personas():
 def comparativa():
     try:
         # Alumno:
+        """
         result = '''<h3>Implementar una función en persona.py
                     nationality_review</h3>'''
         result += '''<h3>El eje "X" del gráfico debe ser los IDs
@@ -122,6 +132,8 @@ def comparativa():
         result += '''<h3>Esa funcion debe devolver los datos que necesite
                     para implementar el grafico a mostrar</h3>'''
         return (result)
+        """
+        return persona.nationality_review()
     except:
         return jsonify({'trace': traceback.format_exc()})
 
@@ -135,8 +147,16 @@ def registro():
             # name = ...
             # age = ...
             # nationality = ...
+            
+            name = str(request.form.get('name'))
+            age = str(request.form.get('age'))
+            nationality = str(request.form.get('nationality'))
+            
 
-            # persona.insert(name, int(age), nationality)
+            if (name is None or nationality is None or age is  None or age.isdigit() is False):
+                return Response(status=400)
+            
+            persona.insert(name,int(age),nationality)
             return Response(status=200)
         except:
             return jsonify({'trace': traceback.format_exc()})
