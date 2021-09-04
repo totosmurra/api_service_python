@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 import numpy as np
 from flask import Flask, request, jsonify, render_template, Response, redirect
 import matplotlib
+from sqlalchemy.orm import query
 matplotlib.use('Agg')   # For multi thread, non-interactive backend (avoid run in main loop)
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -36,3 +37,75 @@ app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_config['database']}"
 db.init_app(app)
 
 
+@app.route("/")
+def index():
+    try:
+        # Imprimir los distintos endopoints disponibles
+        result = "<h1>Bienvenido!!</h1>"
+        result += "<h2>Endpoints disponibles:</h2>"
+        result += "<h3>/clearfill para reiniciar la tabla</h3>"
+        result += "<h3>[GET] /user/{id}/titles para obtener datos especificos de un id</h3>"
+        result += "<h3>[GET] /user/graph para ver un grafico de la cantidad de ids que completaron</h3>"
+        result += "<h3>[GET] /user/titles para ver el total de usuarios que lo completaros</h3>"
+        return(result)
+    except:
+        return jsonify({'trace': traceback.format_exc()})
+
+
+
+@app.route("/clearfill")
+def reset():
+    try:
+        # Borrar y crear la base de datos
+        Ej_prof_api_service.clear()
+        Ej_prof_api_service.fill()
+        result = "<h3>Base de datos re-generada!"
+        return (result)
+    except:
+        return jsonify({'trace': traceback.format_exc()})
+
+
+
+@app.route("/user/<id>/titles")
+def user_id_titles(id):
+    try:
+
+        userId = id
+
+        datarda = Ej_prof_api_service.title_completed_count(userId)
+
+        result = "<h3>El usuario {} completo {}</h3>".format(id, datarda)
+
+        return (result)
+
+    except:
+        return jsonify({'trace': traceback.format_exc()})
+
+
+
+@app.route("/user/graph")
+def graph():
+    try:
+        return Ej_prof_api_service.graph()
+    
+    except:
+        return jsonify({'trace': traceback.format_exc()})
+
+
+'''
+@app.route("/user/titles")
+def titles():
+    try:
+'''
+
+
+
+
+
+
+if __name__ == '__main__':
+    print('Servidor arriba!')
+
+    app.run(host=server_config['host'],
+            port=server_config['port'],
+            debug=True)

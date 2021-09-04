@@ -22,13 +22,16 @@ import matplotlib.image as mpimg
 import sqlalchemy
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import session, sessionmaker, relationship
+from sqlalchemy.orm import query, session, sessionmaker, relationship
 
 from ntpath import join
 from os import name
 
 import sqlite3
 
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
 
 engine = sqlalchemy.create_engine("sqlite:///Ej_prof_api_service.db")
 base = declarative_base()
@@ -68,6 +71,49 @@ def fill():
 
 
 
+def title_completed_count(userId):
+
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    query = session.query(Usuarios).filter(Usuarios.userId == userId).filter(Usuarios.completed == true).count
+
+    return (query)
 
 
 
+def graph():
+    listadeids = []
+    listadecompleted = []
+
+    for i in range(1,11):
+        query = session.query(Usuarios).filter(Usuarios.userId == i).filter(Usuarios.completed == true).count
+
+        listadeids.append(i)
+        listadecompleted.append(query)
+    
+    fig = Figure(figsize=(15,7))
+    fig.tight_layout()
+
+    ax = fig.add_subplot()
+
+    ax.bar(listadeids, listadecompleted)
+    ax.legend()
+    ax.grid()
+
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+        
+    return Response(output.getvalue(), mimetype='image/png')
+
+
+def titles():
+    listadeids = []
+    listadecompleted = []
+
+    for i in range(1,11):
+        query = session.query(Usuarios).filter(Usuarios.userId == i).filter(Usuarios.completed == true).count
+
+        listadeids.append(i)
+        listadecompleted.append(query)
+    
