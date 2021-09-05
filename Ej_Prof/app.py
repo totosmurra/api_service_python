@@ -92,14 +92,20 @@ def graph():
         return jsonify({'trace': traceback.format_exc()})
 
 
-'''
+
 @app.route("/user/titles")
-def titles():
+def titlesss():
     try:
-'''
+        rar = Ej_prof_api_service.titles()
 
+        rar = str(rar)
 
+        result = "<h3>Estos son los ids que completaron</h3>"
+        result += "<h3>{}</h3>".format(rar)
 
+        return result
+    except:
+        return jsonify({'trace': traceback.format_exc()})
 
 
 

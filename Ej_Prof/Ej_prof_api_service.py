@@ -24,6 +24,8 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import query, session, sessionmaker, relationship
 
+from sqlalchemy import func
+
 from ntpath import join
 from os import name
 
@@ -76,20 +78,23 @@ def title_completed_count(userId):
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    query = session.query(Usuarios).filter(Usuarios.userId == userId).filter(Usuarios.completed == true).count
+    query = session.query(Usuarios).filter(Usuarios.userId == userId).filter(Usuarios.completed == 1).count()
 
     return (query)
 
 
 
 def graph():
-    listadeids = []
+
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    listadeids = [1,2,3,4,5,6,7,8,9,10]
     listadecompleted = []
 
-    for i in range(1,11):
-        query = session.query(Usuarios).filter(Usuarios.userId == i).filter(Usuarios.completed == true).count
+    for i in listadeids:
+        query = session.query(Usuarios).filter(Usuarios.userId == i).filter(Usuarios.completed == 1).count()
 
-        listadeids.append(i)
         listadecompleted.append(query)
     
     fig = Figure(figsize=(15,7))
@@ -108,12 +113,24 @@ def graph():
 
 
 def titles():
-    listadeids = []
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    listadeids = [1,2,3,4,5,6,7,8,9,10]
     listadecompleted = []
+    jsonarchivo = []
 
-    for i in range(1,11):
-        query = session.query(Usuarios).filter(Usuarios.userId == i).filter(Usuarios.completed == true).count
 
-        listadeids.append(i)
+    for i in listadeids:
+        query = session.query(Usuarios).filter(Usuarios.userId == i).filter(Usuarios.completed == 1).count()
+
         listadecompleted.append(query)
+
+        qwerty = {i:query}
+
+        jsonarchivo.append(qwerty)
+    
+    return jsonarchivo
+
+    
     
